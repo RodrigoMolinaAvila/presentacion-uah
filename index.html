@@ -374,7 +374,7 @@
               <text class="label" x="780" y="540">magazine</text>
             </svg>
           </div>
-          <figcaption>Medvetz (2023)</figcaption>
+          <figcaption>Medvetz (2012)</figcaption>
         </figure>
 
         <!-- Derecha: Intuición -->
@@ -553,8 +553,8 @@
                 <div>
                   <h4 class="font-semibold">Niveles de análisis</h4>
                   <ul class="list-disc pl-5 mt-2 space-y-1">
-                    <li><strong style="color:#60A5FA">Nivel 1:</strong> volumen temporal.</li>
-                    <li><strong style="color:#FBBF24">Nivel 2:</strong> semántica (SBERT &amp; BERTopic).</li>
+                    <li><strong style="color:#60A5FA">Nivel 1:</strong> volumen por tipo y orientación política</li>
+                    <li><strong style="color:#FBBF24">Nivel 2:</strong> semántica (SBERT &amp; BERTopic) para todas las publicaciones de los think tanks.</li>
                     <li><strong style="color:#F472B6">Nivel 3:</strong> zoom en tópicos predominantes.</li>
                   </ul>
                 </div>
@@ -564,7 +564,7 @@
             <div class="panel-card">
               <div class="flex items-start gap-3">
                 <div class="w-10 h-10 rounded-full grid place-items-center" style="background:#FBCFE8;"><i class="fa-regular fa-lightbulb text-[var(--slate-900)]"></i></div>
-                <p class="opacity-95">El corpus es un <em>proxy</em> robusto de intervenciones de “opinión” y evidencia “experta” en políticas públicas en Chile (con sus límites).</p>
+                <p class="opacity-95">El corpus contiene: el título + la publicación escrita + el boletín o informe descargable para ser procesados en un valor</p>
               </div>
             </div>
           </div>
@@ -684,26 +684,25 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="data-card p-4">
-                <h4 class="font-semibold mb-1" style="color:#10B981">Hitos</h4>
+                <h4 class="font-semibold mb-1" style="color:#10B981">Tipo de Think Tank</h4>
                 <ul class="list-disc pl-5">
-                  <li>Estallido social (2019)</li>
-                  <li>Pandemia COVID-19 (2020–2021)</li>
-                  <li>Proceso constituyente (2021–2022)</li>
+                  <li>Universidades</li>
+                  <li>Transversales</li>
+                  <li>De partido</li>
                 </ul>
               </div>
               <div class="data-card p-4">
-                <h4 class="font-semibold mb-1" style="color:#8B5CF6">Orientaciones</h4>
+                <h4 class="font-semibold mb-1" style="color:#8B5CF6">Orientación Política</h4>
                 <ul class="list-disc pl-5">
-                  <li>Centro-derecha</li>
+                  <li>Derecha</li>
                   <li>Izquierda</li>
-                  <li>Centro</li>
                 </ul>
               </div>
             </div>
 
             <div class="data-card p-4">
-              <h4 class="font-semibold mb-1" style="color:#F59E0B">Hallazgo</h4>
-              <p>Picos de publicación co-ocurren con eventos políticos; la magnitud varía por orientación.</p>
+              <h4 class="font-semibold mb-1" style="color:#F59E0B">¿Hallazgos?</h4>
+              <p>Observar como la producción de los Think Tank emerge (o no) en relación a los eventos.</p>
             </div>
           </div>
         </div>
@@ -715,11 +714,11 @@
       <div class="w-full h-full grid md:grid-cols-3 gap-4">
         <div class="md:col-span-1 flex flex-col justify-center">
           <h3 class="title-lg font-heading font-bold mb-2" style="color:var(--ink-90)">Historia breve de NLP</h3>
-          <p class="body-md opacity-90">Marco metodológico histórico de la evolución del Procesamiento del Lenguaje Natural (NLP) </p>
+          <p class="body-md opacity-90">Como hemos experimentado en las técnicas de procesamiento de lenguaje natural en el proyecto</p>
           <p class="mt-2 text-sm opacity-70"></p>
         </div>
         <div class="md:col-span-2">
-          <div class="embed-card w-full h-[min(90vh,calc(100vh-140px))]">
+          <div class="embed-card w-full h-[min(90vh,calc(100vh-100px))]">
             <iframe class="embed-frame" src="https://rodrigomolinaavila.github.io/nlp-uah/#tf-idf" loading="lazy" allowfullscreen referrerpolicy="no-referrer" title="Historia NLP — UAH"></iframe>
           </div>
         </div>
@@ -873,7 +872,7 @@
             <a class="inline-block px-7 py-3 rounded-2xl text-white font-heading font-semibold"
                style="background-image: linear-gradient(90deg, var(--uah-orange), var(--uah-orange-2)); box-shadow: 0 14px 40px rgba(238,93,73,.25);"
                href="#slide1">¡Gracias!</a>
-            <p class="mt-2 text-sm opacity-70">Presentación: Rodrigo Molina Ávila</p>
+            <p class="mt-2 text-sm opacity-70">Presentación diseñada por: Rodrigo Molina Ávila</p>
           </div>
         </div>
       </div>
