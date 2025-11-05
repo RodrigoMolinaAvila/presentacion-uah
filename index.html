@@ -236,6 +236,8 @@
     /* ===== Slide 5/6 (panels + embeds) ===== */
     .panel-card{ padding: clamp(12px, 1.4vw, 18px); }
 
+    
+
     /* ===== Slide 7 (Nivel 1) ===== */
     #slide7 .embed-card,
     #slide9 .embed-card{
@@ -250,7 +252,7 @@
       border: 1px solid var(--card-bd);
       box-shadow: var(--card-sh);
     }
-
+    
     /* Titulares se adaptan al alto útil del slide */
     .title-xl{ font-size: clamp(1.8rem, 2.1vw, 3rem); line-height: 1.15; }
     .title-lg{ font-size: clamp(1.35rem, 1.6vw, 2.1rem); line-height: 1.2; }
@@ -573,6 +575,23 @@
     </section>
 
     <!-- ========== SLIDE 6: WEBSCRAPING (logos + pipeline) ========== -->
+<style>
+  /* Solo para los tiles de logos en slide6 */
+  #slide6 .tt-cell{
+    background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.08)) !important;
+    border: 1px solid rgba(0,0,0,.22) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.06),
+      0 8px 22px -10px rgba(0,0,0,.35);
+    border-radius: 14px; /* mismo radio que data-card */
+  }
+  #slide6 .tt-cell:hover{
+    background: linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.12)) !important;
+  }
+  /* Por si algún logo trae borde propio, evita que “cante” */
+  #slide6 .tt-cell img{ display:block; max-height:3.5rem; }
+</style>
+
     <section id="slide6" class="slide" style="left: 500vw;">
       <div class="container mx-auto h-full flex flex-col">
         <h3 class="title-xl font-heading font-extrabold text-center mb-4" style="color:var(--ink-90)">Webscraping</h3>
@@ -585,30 +604,30 @@
 
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-4">
                 <!-- (Los 24 logos) -->
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cdc.png" alt="CDC"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ced.png" alt="CED"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cep.svg" alt="CEP"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/clapesuc.webp" alt="CLAPES UC"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/casacomun.jpg" alt="Casa Común"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/chile21.svg" alt="Chile 21"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/espaciopublico.png" alt="Espacio Público"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fpp.png" alt="FPP"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionjaimeguzman.png" alt="FJG"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionsol.png" alt="Fundación Sol"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizontal.svg" alt="Horizontal"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizonteciudadano.svg" alt="Horizonte Ciudadano"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ical.png" alt="ICAL"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ies.webp" alt="IES"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideapais.png" alt="Idea País"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideasrepublicanas.png" alt="Ideas Republicanas"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutoigualdad.png" alt="Instituto Igualdad"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutolibertad.png" alt="Instituto Libertad"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutorespublica.png" alt="Res Pública"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/lyd1536x1299.png" alt="LyD"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/nodoxxi.webp" alt="Nodo XXI"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/opes.webp" alt="OPES"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/pivotes.png" alt="Pivotes"></div>
-                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/signosuandes.svg" alt="Signos UANDES"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cdc.png" alt="CDC"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ced.png" alt="CED"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cep.svg" alt="CEP"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/clapesuc.webp" alt="CLAPES UC"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/casacomun.jpg" alt="Casa Común"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/chile21.svg" alt="Chile 21"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/espaciopublico.png" alt="Espacio Público"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fpp.png" alt="FPP"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionjaimeguzman.png" alt="FJG"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionsol.png" alt="Fundación Sol"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizontal.svg" alt="Horizontal"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizonteciudadano.svg" alt="Horizonte Ciudadano"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ical.png" alt="ICAL"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ies.webp" alt="IES"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideapais.png" alt="Idea País"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideasrepublicanas.png" alt="Ideas Republicanas"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutoigualdad.png" alt="Instituto Igualdad"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutolibertad.png" alt="Instituto Libertad"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutorespublica.png" alt="Res Pública"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/lyd1536x1299.png" alt="LyD"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/nodoxxi.webp" alt="Nodo XXI"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/opes.webp" alt="OPES"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/pivotes.png" alt="Pivotes"></div>
+                <div class="data-card tt-cell grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/signosuandes.svg" alt="Signos UANDES"></div>
               </div>
 
               <h5 class="font-heading font-semibold mb-1" style="color:#2563EB">Consideraciones</h5>
