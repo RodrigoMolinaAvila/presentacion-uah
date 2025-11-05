@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Presentación — Departamento de Sociología UAH</title>
+
+  <!-- Libs -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Raleway', 'system-ui', 'sans-serif'],
+            heading: ['Montserrat', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Paleta/tema UAH -->
+  <style id="uah-theme">
+    :root{
+      --uah-orange: #EE5D49;             /* naranjo institucional */
+      --uah-orange-2: #F7B267;           /* naranjo cálido para gradientes */
+      --ink-95: #161A22;                 /* texto primario en fondo claro */
+      --ink-90: #1F2632;
+      --ink-70: #475569;
+      --paper-0: #FFFFFF;
+      --paper-1: #FBF8F3;                /* beige */
+      --paper-2: #F2ECE3;
+      --card-bd: rgba(0,0,0,.08);
+      --card-sh: 0 18px 46px rgba(0,0,0,.16);
+      --slate-950: #0B1220;              /* pizarra profundo (para contraste) */
+      --slate-900: #0E1726;
+      --slate-850: #122034;
+    }
+
+    html, body{
+      width:100%; height:100%;
+      margin:0; padding:0; overflow:hidden;
+      background:
+        radial-gradient(1200px 600px at 100% 50%, rgba(0,0,0,.03) 0%, rgba(0,0,0,0) 60%),
+        linear-gradient(135deg, var(--paper-1) 0%, #FFF 55%, #FFF 100%);
+      color: var(--ink-90);
+      font-synthesis-weight: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Cada slide ocupa siempre el viewport completo (fullscreen) */
+    .slides-container{
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .slide{
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      padding: clamp(16px, 2.2vw, 28px);
+      box-sizing: border-box;
+      transition: transform 1.05s cubic-bezier(.65,0,.35,1);
+      display: block;
+    }
+
+    /* Tipografía/jerarquía escalable a 1920x1080 y móviles */
+    h1.hero-title{
+      font-family: var(--font-heading, 'Montserrat'), system-ui, sans-serif;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      /* Gradiente UAH */
+      background-image: linear-gradient(45deg, var(--uah-orange), var(--uah-orange-2));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; text-fill-color: transparent;
+      font-size: clamp(1.8rem, 3.2vw, 4.2rem);
+    }
+    .subtitle{
+      font-family: var(--font-heading, 'Montserrat');
+      font-weight: 600;
+      color: var(--ink-70);
+      font-size: clamp(1.1rem, 1.35vw, 1.8rem);
+    }
+
+    /* Cards claras coherentes con paleta */
+    .data-card,
+    .embed-card,
+    .q-card,
+    .panel-card{
+      background: var(--paper-0);
+      border: 1px solid var(--card-bd);
+      border-radius: 18px;
+      box-shadow: var(--card-sh);
+      color: var(--ink-90);
+    }
+
+    /* Botones navegación + indicador */
+    .navigation-buttons{
+      position: fixed; right: clamp(10px, 1.2vw, 18px); top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; z-index: 70;
+    }
+    .nav-btn{
+      width: 3rem; height: 3rem; border-radius: 9999px; cursor: pointer;
+      border: 1px solid var(--card-bd);
+      background: var(--paper-0);
+      color: var(--ink-90);
+      display: grid; place-items: center;
+      transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+    }
+    .nav-btn:hover{ border-color: rgba(238,93,73,.34); box-shadow: 0 10px 28px rgba(238,93,73,.16); transform: translateY(-1px); }
+
+    .slide-indicator{
+      position: fixed; left: 50%; bottom: clamp(12px, 1.8vh, 22px); transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 70;
+    }
+    .indicator-node{
+      width: 10px; height: 10px; border-radius: 9999px;
+      background: rgba(0,0,0,.12);
+      border: 1px solid var(--card-bd);
+      transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+    .indicator-node.active{
+      background: var(--uah-orange);
+      transform: scale(1.3);
+      box-shadow: 0 0 0 4px rgba(238,93,73,.18);
+    }
+
+    /* Tooltip oscuro para lecturabilidad */
+    .tooltip{
+      position: fixed; z-index: 100;
+      padding: .55rem .7rem; font-size: .95rem; border-radius: 10px;
+      background: rgba(15,23,42,.95);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff; pointer-events: none;
+    }
+
+    /* Iframes: ventana dentro de ventana, mantienen proporción y ocupan su panel */
+    .embed-card{ position: relative; overflow: hidden; }
+    .embed-card::before{
+      content:""; position:absolute; inset:0; pointer-events:none; border-radius:18px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), inset 0 22px 46px rgba(0,0,0,.06);
+    }
+    .embed-frame{
+      display:block; width:100%; height:100%; border:0; background: var(--paper-0);
+    }
+
+    /* Grillas de proporción */
+    .golden-grid{ display:grid; grid-template-columns: 62% 38%; gap: clamp(12px, 1.6vw, 22px); height: 100%; }
+    .golden-grid.reverse{ grid-template-columns: 38% 62%; }
+
+    @media (max-width: 1024px){
+      .golden-grid, .golden-grid.reverse{ grid-template-columns: 1fr; grid-auto-rows: minmax(0,1fr); }
+    }
+
+    /* ===== Slide 1 (Portada) ===== */
+    #slide1 .brand-band{
+      background: linear-gradient(180deg, rgba(255,255,255,.68), rgba(255,255,255,.50));
+      border: 1px solid var(--card-bd);
+      border-radius: 22px;
+      box-shadow: var(--card-sh);
+      padding: clamp(14px, 1.8vw, 22px);
+    }
+
+    /* ===== Slide 2 (Intuición + diagrama) ===== */
+    #slide2 .diagram-card{
+      background: var(--slate-950);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 18px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.45);
+      display:flex; flex-direction:column; gap:12px; padding: clamp(10px, 1.2vw, 16px);
+      min-height: 420px;
+    }
+    #slide2 .diagram-frame{
+      width: 100%;
+      aspect-ratio: 4 / 3;               /* proporción controlada */
+      border-radius: 14px; overflow: hidden;
+      background: radial-gradient(120% 120% at 22% 0%, rgba(255,255,255,.06) 0%, rgba(255,255,255,.02) 52%, transparent 100%), #0B111B;
+      outline: 1px solid rgba(255,255,255,.04);
+    }
+    #slide2 .diagram-frame svg{
+      width:100%; height:100%; display:block;
+    }
+    /* Forzamos contraste blanco */
+    #slide2 .diagram-frame svg .box{ stroke:#fff !important; }
+    #slide2 .diagram-frame svg .dash{ stroke:#fff !important; }
+    #slide2 .diagram-frame svg .title,
+    #slide2 .diagram-frame svg .label{ fill:#fff !important; }
+
+    #slide2 .diagram-frame svg .box,
+    #slide2 .diagram-frame svg .dash{
+      opacity:.62; transition: opacity .25s ease, filter .25s ease, stroke-width .25s ease;
+    }
+    #slide2 .diagram-frame svg .hl{
+      opacity:1; stroke-width:3.2;
+      filter: drop-shadow(0 0 10px rgba(238,93,73,.55)) drop-shadow(0 0 24px rgba(247,178,103,.35));
+    }
+    #slide2 figcaption{ color: #E8EDF6; opacity:.8; text-align: right; font-size: .9rem; }
+
+    /* ===== Slide 3 (Literatura, bandas) ===== */
+    #slide3 .band{
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      min-height: 0; padding: clamp(12px, 1.4vw, 18px);
+    }
+
+    /* ===== Slide 4 (Preguntas) ===== */
+    #slide4 .q-card{
+      padding: clamp(14px, 1.6vw, 22px);
+      opacity:.55;
+      transition: all .8s cubic-bezier(.22,.61,.36,1);
+    }
+    #slide4 .q-card.is-on{
+      opacity: 1;
+      box-shadow: 0 12px 34px rgba(0,0,0,.16), 0 0 0 1px rgba(238,93,73,.12) inset;
+      border-color: rgba(238,93,73,.32);
+    }
+    #slide4 .q-card.is-main{
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 18px 46px rgba(0,0,0,.22),
+        0 0 0 1px rgba(238,93,73,.24) inset,
+        0 0 42px rgba(238,93,73,.28);
+    }
+
+    /* ===== Slide 5/6 (panels + embeds) ===== */
+    .panel-card{ padding: clamp(12px, 1.4vw, 18px); }
+
+    /* ===== Slide 7 (Nivel 1) ===== */
+    #slide7 .embed-card,
+    #slide9 .embed-card{
+      height: 100%; min-height: 380px;
+    }
+
+    /* Títulos pequeños con badge de color */
+    .chip-title{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 12px; border-radius: 9999px;
+      background: var(--paper-0);
+      border: 1px solid var(--card-bd);
+      box-shadow: var(--card-sh);
+    }
+
+    /* Titulares se adaptan al alto útil del slide */
+    .title-xl{ font-size: clamp(1.8rem, 2.1vw, 3rem); line-height: 1.15; }
+    .title-lg{ font-size: clamp(1.35rem, 1.6vw, 2.1rem); line-height: 1.2; }
+    .body-md{ font-size: clamp(.98rem, .95vw, 1.05rem); line-height: 1.55; }
+
+    /* Utilidades */
+    .minh-0{ min-height: 0; }
+    .scrollable{ overflow: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  </style>
+</head>
+
+<body class="tracking-tight antialiased">
+  <div class="slides-container">
+
+    <!-- ========== SLIDE 1: PORTADA ========== -->
+    <section id="slide1" class="slide">
+      <!-- Fondo fotográfico + velo -->
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 opacity-25" style="background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2100&q=80'); background-size: cover; background-position:center;"></div>
+        <div class="absolute inset-0" style="background: radial-gradient(160% 120% at 70% 10%, rgba(238,93,73,.18), transparent 55%), linear-gradient(180deg, rgba(255,255,255,.0), rgba(255,255,255,.0));"></div>
+      </div>
+
+      <!-- Contenido -->
+      <div class="relative z-10 w-full h-full grid place-items-center">
+        <div class="w-[min(1200px,92vw)] mx-auto text-center space-y-5 md:space-y-6">
+          <h1 class="hero-title">Conocimiento experto en tiempos convulsos: Think tanks durante las crisis políticas de Chile (2019–2023)</h1>
+          <p class="subtitle">Presentación para el Departamento de Sociología — UAH</p>
+
+          <div class="brand-band inline-block">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2 text-left">
+              <div>
+                <p class="font-heading font-semibold text-[clamp(1.05rem,1.2vw,1.4rem)]">Marcos González Hernando</p>
+                <p class="text-[clamp(.95rem,1vw,1.1rem)] opacity-80">Universidad Diego Portales — COES</p>
+              </div>
+              <div>
+                <p class="font-heading font-semibold text-[clamp(1.05rem,1.2vw,1.4rem)]">Rodrigo Molina Ávila</p>
+                <p class="text-[clamp(.95rem,1vw,1.1rem)] opacity-80">Universidad de Chile — IDIA</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logos -->
+          <div class="mx-auto w-[min(1050px,94vw)]">
+            <div class="mt-4 md:mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-5 px-6 py-4 rounded-2xl bg-white/65 border border-[color:var(--card-bd)] shadow-[var(--card-sh)]">
+              <img class="h-10 md:h-12 object-contain" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/udp.png" alt="UDP"/>
+              <img class="h-12 md:h-14 object-contain" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/coes.png" alt="COES"/>
+              <img class="h-12 md:h-14 object-contain" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/uchile.png" alt="U. de Chile"/>
+              <img class="h-12 md:h-14 object-contain" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/idia_white.png" alt="IDIA"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 2: INTUICIÓN + DIAGRAMA (alto contraste) ========== -->
+    <section id="slide2" class="slide" style="left: 100vw;">
+      <div class="golden-grid h-full">
+        <!-- Izquierda: Diagrama -->
+        <figure class="diagram-card">
+          <div class="diagram-frame">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1300" height="980" viewBox="0 0 1200 980" role="img" aria-label="Diagrama de campos y espacio de think tanks" id="tt-diagram">
+              <defs>
+                <style type="text/css"><![CDATA[
+                  .box { fill: none; stroke: #000; stroke-width: 2; }
+                  .dash { fill: none; stroke: #000; stroke-width: 2; stroke-dasharray: 6 6; }
+                  .title { font-family: "Montserrat", Georgia, serif; font-size: 25px; text-anchor: middle; dominant-baseline: middle; }
+                  .label { font-family: "Montserrat", Georgia, serif; font-size: 20px; text-anchor: middle; dominant-baseline: middle; }
+                ]]></style>
+              </defs>
+
+              <!-- 1) POLITICAL FIELD -->
+              <rect class="box" x="300" y="60" width="600" height="430" />
+              <text class="title" x="600" y="78">POLITICAL FIELD</text>
+
+              <!-- 2) FIELD OF KNOWLEDGE PRODUCTION -->
+              <rect class="box" x="140" y="170" width="360" height="390" />
+              <text class="title" x="320" y="188">FIELD OF KNOWLEDGE</text>
+              <text class="title" x="320" y="214">PRODUCTION</text>
+
+              <!-- 3) ECONOMIC FIELD -->
+              <rect class="box" x="700" y="170" width="360" height="390" />
+              <text class="title" x="880" y="188">ECONOMIC FIELD</text>
+
+              <!-- 4) MEDIA FIELD -->
+              <rect class="box" x="360" y="430" width="480" height="250" />
+              <text class="title" x="600" y="666">MEDIA FIELD</text>
+
+              <!-- 5) ROMBO CENTRAL -->
+              <polygon class="dash" points="600,212 714,320 600,428 486,320" />
+              <text class="label" x="600" y="312">Space of</text>
+              <text class="label" x="600" y="334">think tanks</text>
+
+              <!-- Conceptos -->
+              <text class="label" x="600" y="130">State agency</text>
+              <text class="label" x="600" y="156">Party</text>
+              <text class="label" x="600" y="182">Social move. org</text>
+
+              <text class="label" x="300" y="318">University</text>
+              <text class="label" x="440" y="262">Public policy</text>
+              <text class="label" x="440" y="282">school</text>
+              <text class="label" x="440" y="364">Academic policy</text>
+              <text class="label" x="440" y="384">research inst</text>
+
+              <text class="label" x="780" y="262">Lobbying</text>
+              <text class="label" x="780" y="282">firm</text>
+              <text class="label" x="780" y="364">Trade</text>
+              <text class="label" x="780" y="384">association</text>
+
+              <text class="label" x="900" y="316">Business corporation</text>
+              <text class="label" x="900" y="338">Labor union</text>
+
+              <text class="label" x="600" y="450">Policy journal</text>
+              <text class="label" x="600" y="470">Political "blogosphere"</text>
+
+              <text class="label" x="420" y="515">Journalism</text>
+              <text class="label" x="420" y="540">school</text>
+
+              <text class="label" x="600" y="540">Newspaper</text>
+
+              <text class="label" x="780" y="515">Commercial</text>
+              <text class="label" x="780" y="540">magazine</text>
+            </svg>
+          </div>
+          <figcaption>Medvetz (2023)</figcaption>
+        </figure>
+
+        <!-- Derecha: Intuición -->
+        <div class="flex flex-col justify-center px-2 md:px-4">
+          <h2 class="font-heading font-extrabold title-xl mb-4" style="color: var(--ink-90);">Intuición inicial</h2>
+
+          <div class="space-y-5 body-md">
+            <p class="relative pl-10">
+              <span class="absolute left-0 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full" style="background: var(--uah-orange); color:#fff; font-weight:700;">1</span>
+              Los think tanks son organizaciones <strong>híbridas</strong> que operan en la intersección de campos—academia, política, medios y financiamiento.
+            </p>
+            <p class="relative pl-10">
+              <span class="absolute left-0 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full" style="background: #F59E0B; color:#111827; font-weight:700;">2</span>
+              Precisamente por ser híbridos, son <strong>sensibles a cambios</strong> en su ambiente.
+            </p>
+            <p class="relative pl-10">
+              <span class="absolute left-0 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full" style="background: #10B981; color:#0A0F1A; font-weight:700;">3</span>
+              Indicadores privilegiados de <strong>transformaciones</strong>: quién produce conocimiento experto, lenguajes legítimos y acceso a plataformas para intervenir en el debate público.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animación secuencial del diagrama -->
+      <script>
+        (function () {
+          const slide = document.getElementById('slide2');
+          const svg   = document.getElementById('tt-diagram');
+          if (!slide || !svg) return;
+
+          const seq = [
+            svg.querySelector('rect.box[x="300"][y="60"]'),
+            svg.querySelector('rect.box[x="140"][y="170"]'),
+            svg.querySelector('rect.box[x="700"][y="170"]'),
+            svg.querySelector('rect.box[x="360"][y="430"]'),
+            svg.querySelector('polygon.dash')
+          ].filter(Boolean);
+
+          const STEP_MS = 1500;
+          let idx = 0, timer = null;
+
+          function highlight(i){ seq.forEach(el => el && el.classList.remove('hl')); if(seq[i]) seq[i].classList.add('hl'); }
+          function step(){ highlight(idx); idx = (idx+1)%seq.length; timer = setTimeout(step, STEP_MS); }
+          function start(){ if(!timer) step(); }
+          function stop(){ if(timer){ clearTimeout(timer); timer=null; } seq.forEach(el=>el && el.classList.remove('hl')); }
+
+          const io = new IntersectionObserver(entries=>{
+            entries.forEach(e => e.isIntersecting ? start() : stop());
+          }, { threshold: .38 });
+          io.observe(slide);
+
+          document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); else{
+            const r = slide.getBoundingClientRect();
+            const inView = r.top < innerHeight*.65 && r.bottom > innerHeight*.35;
+            if(inView) start();
+          }});
+        })();
+      </script>
+    </section>
+
+    <!-- ========== SLIDE 3: LITERATURA RELEVANTE ========== -->
+    <section id="slide3" class="slide" style="left: 200vw;">
+      <div class="w-full h-full flex flex-col">
+        <h3 class="title-xl font-heading font-extrabold text-center mb-3" style="color:var(--ink-90)">Literatura relevante</h3>
+
+        <div class="grid grid-rows-3 gap-3 md:gap-4 flex-1">
+          <!-- Banda 1 -->
+          <div class="data-card band">
+            <div class="w-[min(1100px,92vw)]">
+              <h4 class="title-lg font-heading font-semibold mb-2" style="color: var(--uah-orange)">Think tanks como organizaciones híbridas</h4>
+              <ul class="grid gap-2 body-md">
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#f97373;"></span><strong>Medvetz (2012)</strong>: organizaciones que operan en la intersección de campos (academia, política, medios, economía).</li>
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#f97373;"></span>Función de <em>brokers</em> que traducen capitales y lógicas (Stone).</li>
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#f97373;"></span>¿Qué ocurre cuando los campos se desestabilizan? (Dobry).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Banda 2 -->
+          <div class="data-card band">
+            <div class="w-[min(1100px,92vw)]">
+              <h4 class="title-lg font-heading font-semibold mb-2" style="color:#F59E0B">Literatura chilena — hallazgos y vacíos</h4>
+              <ul class="grid gap-2 body-md">
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#F59E0B;"></span>Dictadura y transición bien estudiadas (Puryear, Silva, Gárate) y estudios de caso (Morales, Jara).</li>
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#F59E0B;"></span>Escasez de análisis longitudinales para crisis recientes (Cociña & Toro).</li>
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#F59E0B;"></span>Excepciones parciales: Alenda 2020, Dávila 2020, Cortés et&nbsp;al. 2023.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Banda 3 -->
+          <div class="data-card band">
+            <div class="w-[min(1100px,92vw)]">
+              <h4 class="title-lg font-heading font-semibold mb-2" style="color:#10B981">Infraestructura intelectual (marco tentativo)</h4>
+              <ul class="grid gap-2 body-md">
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#10B981;"></span>Condiciones materiales e institucionales que posibilitan intervenciones.</li>
+                <li><span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-2" style="background:#10B981;"></span>En Chile: financiamiento concentrado, oligopolio mediático, baja cooperación internacional.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 4: PREGUNTAS DE INVESTIGACIÓN ========== -->
+    <section id="slide4" class="slide" style="left: 300vw;">
+      <div class="w-full h-full grid place-items-center">
+        <div class="w-[min(900px,92vw)] mx-auto">
+          <h3 class="title-xl font-heading font-extrabold text-center mb-6" style="color:var(--ink-90)">Preguntas de investigación</h3>
+
+          <div class="grid gap-4">
+            <div class="q-card body-md">¿Cómo evolucionó la <strong style="color:var(--uah-orange)">producción</strong> de think tanks (2019–2023) en volumen y frecuencia?</div>
+            <div class="q-card body-md">¿Qué <strong style="color:#F59E0B">temas</strong> dominaron y cómo cambiaron? (agenda temática)</div>
+            <div class="q-card body-md">¿Convergencia o <strong style="color:#10B981">divergencia</strong> semántica? (lenguajes compartidos vs. fragmentación)</div>
+            <div class="q-card body-md">¿Qué revelan estos patrones sobre la <strong style="color:#6366F1">expertise</strong> en contextos de transformación institucional?</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function(){
+          const slide = document.getElementById('slide4');
+          if(!slide) return;
+          const cards = slide.querySelectorAll('.q-card');
+          const STEP_MS = 3500;
+          let started = false;
+
+          function runOnce(){
+            if(started) return; started = true;
+            let i = 0;
+            function step(){
+              if(i < cards.length){
+                cards[i].classList.add('is-on');
+                if(i === cards.length - 1) cards[i].classList.add('is-main');
+                i++; setTimeout(step, STEP_MS);
+              }
+            }
+            step();
+          }
+          const io = new IntersectionObserver(entries=>{
+            entries.forEach(e=>{ if(e.isIntersecting) runOnce(); });
+          },{threshold:.45});
+          io.observe(slide);
+        })();
+      </script>
+    </section>
+
+    <!-- ========== SLIDE 5: DATOS Y MÉTODOS (embed histogramas) ========== -->
+    <section id="slide5" class="slide" style="left: 400vw;">
+      <div class="w-full h-full grid lg:grid-cols-[66%_34%] grid-cols-1 gap-4">
+        <!-- IZQ: embed -->
+        <div class="flex items-center">
+          <div class="embed-card w-full h-[min(90vh,calc(100vh-120px))]">
+            <iframe class="embed-frame" src="https://rodrigomolinaavila.github.io/histogramas-thinktank-uah/" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+
+        <!-- DER: texto -->
+        <div class="flex flex-col justify-center px-1 md:px-2">
+          <h3 class="title-lg font-heading font-bold mb-3" style="color:var(--ink-90)">Datos y métodos</h3>
+          <div class="space-y-4 body-md">
+            <div class="panel-card">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full grid place-items-center" style="background:#93C5FD;"><i class="fa-solid fa-database text-[var(--slate-900)]"></i></div>
+                <div>
+                  <h4 class="font-semibold">24 think tanks estudiados</h4>
+                  <p class="opacity-90 mt-1"><span class="inline-block px-2.5 py-1 rounded-md" style="background: #FEF3C7; border:1px solid #FDE68A; color:#92400E; font-weight:600;">17.418 intervenciones (2019–2023)</span></p>
+                  <p class="opacity-90">Boletines, columnas, editoriales, libros, conferencias y publicaciones académicas.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full grid place-items-center" style="background:#E9D5FF;"><i class="fa-solid fa-layer-group text-[var(--slate-900)]"></i></div>
+                <div>
+                  <h4 class="font-semibold">Niveles de análisis</h4>
+                  <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li><strong style="color:#60A5FA">Nivel 1:</strong> volumen temporal.</li>
+                    <li><strong style="color:#FBBF24">Nivel 2:</strong> semántica (SBERT &amp; BERTopic).</li>
+                    <li><strong style="color:#F472B6">Nivel 3:</strong> zoom en tópicos predominantes.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full grid place-items-center" style="background:#FBCFE8;"><i class="fa-regular fa-lightbulb text-[var(--slate-900)]"></i></div>
+                <p class="opacity-95">El corpus es un <em>proxy</em> robusto de intervenciones de “opinión” y evidencia “experta” en políticas públicas en Chile (con sus límites).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 6: WEBSCRAPING (logos + pipeline) ========== -->
+    <section id="slide6" class="slide" style="left: 500vw;">
+      <div class="container mx-auto h-full flex flex-col">
+        <h3 class="title-xl font-heading font-extrabold text-center mb-4" style="color:var(--ink-90)">Webscraping</h3>
+
+        <div class="grid lg:grid-cols-[58%_42%] grid-cols-1 gap-4 minh-0 flex-1">
+          <!-- IZQ: logos + consideraciones (scrollable) -->
+          <section class="panel-card minh-0 flex flex-col">
+            <div class="minh-0 scrollable pr-1">
+              <h4 class="title-lg font-heading font-semibold mb-3" style="color:var(--ink-90)">Fuentes principales (24 think tanks)</h4>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 mb-4">
+                <!-- (Los 24 logos) -->
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cdc.png" alt="CDC"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ced.png" alt="CED"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/cep.svg" alt="CEP"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/clapesuc.webp" alt="CLAPES UC"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/casacomun.jpg" alt="Casa Común"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/chile21.svg" alt="Chile 21"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/espaciopublico.png" alt="Espacio Público"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fpp.png" alt="FPP"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionjaimeguzman.png" alt="FJG"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/fundacionsol.png" alt="Fundación Sol"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizontal.svg" alt="Horizontal"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/horizonteciudadano.svg" alt="Horizonte Ciudadano"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ical.png" alt="ICAL"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ies.webp" alt="IES"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideapais.png" alt="Idea País"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/ideasrepublicanas.png" alt="Ideas Republicanas"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutoigualdad.png" alt="Instituto Igualdad"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutolibertad.png" alt="Instituto Libertad"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/institutorespublica.png" alt="Res Pública"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/lyd1536x1299.png" alt="LyD"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/nodoxxi.webp" alt="Nodo XXI"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/opes.webp" alt="OPES"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/pivotes.png" alt="Pivotes"></div>
+                <div class="data-card grid place-items-center h-[86px]"><img class="max-h-14" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/signosuandes.svg" alt="Signos UANDES"></div>
+              </div>
+
+              <h5 class="font-heading font-semibold mb-1" style="color:#2563EB">Consideraciones</h5>
+              <ul class="list-disc pl-5 body-md space-y-1">
+                <li class="rounded-md px-2 py-1" style="background:linear-gradient(90deg, rgba(238,93,73,.12), rgba(238,93,73,.06));">El universo corresponde a lo publicado por los propios think tanks en sus sitios.</li>
+                <li class="rounded-md px-2 py-1" style="background:linear-gradient(90deg, rgba(238,93,73,.12), rgba(238,93,73,.06));">No necesariamente cubre la totalidad de su producción.</li>
+                <li>Extracción: título, autor, medio, fecha, enlace.</li>
+                <li>Corpus como aproximación a la <strong>infraestructura intelectual</strong> chilena.</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- DER: pipeline + reproducibilidad -->
+          <div class="minh-0 flex flex-col gap-4">
+            <section class="panel-card">
+              <h4 class="title-lg font-heading font-semibold mb-2" style="color:var(--ink-90)">Pipeline de scraping</h4>
+              <div class="w-full flex items-center justify-center gap-5 py-2">
+                <img class="h-[70px]" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/py.png" alt="Python">
+                <i class="fa-solid fa-arrow-right-long text-xl"></i>
+                <img class="h-[70px]" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/selenium.png" alt="Selenium">
+                <i class="fa-solid fa-arrow-right-long text-xl"></i>
+                <img class="h-[70px]" src="https://raw.githubusercontent.com/RodrigoMolinaAvila/web_resources/refs/heads/main/webresources/presentacion-coes/beautfulsoup.png" alt="BeautifulSoup">
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 body-md">
+                <div class="data-card p-3"><h5 class="font-heading font-medium mb-1" style="color:#3B82F6">Python</h5><p>Motor de orquestación y manejo de datos.</p></div>
+                <div class="data-card p-3"><h5 class="font-heading font-medium mb-1" style="color:#10B981">Selenium</h5><p>Automatiza interacción con sitios dinámicos.</p></div>
+                <div class="data-card p-3"><h5 class="font-heading font-medium mb-1" style="color:#F59E0B">BeautifulSoup</h5><p>Parseo y extracción HTML semiestructurada.</p></div>
+              </div>
+            </section>
+
+            <section class="panel-card minh-0 flex-1">
+              <h4 class="title-lg font-heading font-semibold mb-2" style="color:var(--ink-90)">Reproducibilidad & Open Science</h4>
+              <div class="flex items-start gap-3 body-md">
+                <div class="w-12 h-12 grid place-items-center rounded-xl" style="background:#0B1220; color:#fff;"><i class="fab fa-github text-2xl"></i></div>
+                <div>
+                  <p>Código, notebooks y organización:</p>
+                  <a class="inline-flex items-center gap-2 px-3 py-2 rounded-xl mt-1 data-card" href="https://github.com/RodrigoMolinaAvila/minicoesfondap-1523A0005" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i><span class="font-medium">RodrigoMolinaAvila/minicoesfondap-1523A0005</span>
+                  </a>
+                  <div class="mt-3">
+                    <h5 class="font-heading font-medium mb-1" style="color:#10B981">Acceso a base consolidada</h5>
+                    <p>Escribir a <a class="underline decoration-dotted" href="mailto:rodmolina@ug.uchile.cl">rodmolina@ug.uchile.cl</a>.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 7: NIVEL 1 (densidad) ========== -->
+    <section id="slide7" class="slide" style="left: 600vw;">
+      <div class="golden-grid h-full">
+        <div class="p-1 md:p-2">
+          <div class="embed-card h-full">
+            <iframe class="embed-frame" src="https://rodrigomolinaavila.github.io/densidad-thinktank-uah/" loading="lazy" allowfullscreen referrerpolicy="no-referrer" title="Densidad por orientación política"></iframe>
+          </div>
+        </div>
+
+        <div class="flex flex-col justify-center px-2">
+          <div class="chip-title mb-3">
+            <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:#60A5FA;"></span>
+            <h3 class="font-heading font-bold">Nivel 1: Densidad por orientación política</h3>
+          </div>
+
+          <div class="grid gap-3 body-md">
+            <div class="data-card p-4">
+              <h4 class="font-semibold mb-1" style="color:#60A5FA">Evolución temporal</h4>
+              <p>Análisis del volumen de publicaciones por orientación durante 2019–2023.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="data-card p-4">
+                <h4 class="font-semibold mb-1" style="color:#10B981">Hitos</h4>
+                <ul class="list-disc pl-5">
+                  <li>Estallido social (2019)</li>
+                  <li>Pandemia COVID-19 (2020–2021)</li>
+                  <li>Proceso constituyente (2021–2022)</li>
+                </ul>
+              </div>
+              <div class="data-card p-4">
+                <h4 class="font-semibold mb-1" style="color:#8B5CF6">Orientaciones</h4>
+                <ul class="list-disc pl-5">
+                  <li>Centro-derecha</li>
+                  <li>Izquierda</li>
+                  <li>Centro</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="data-card p-4">
+              <h4 class="font-semibold mb-1" style="color:#F59E0B">Hallazgo</h4>
+              <p>Picos de publicación co-ocurren con eventos políticos; la magnitud varía por orientación.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 8: HISTORIA NLP (EMBED) — antes de UMAP3D ========== -->
+    <section id="slide8" class="slide" style="left: 700vw;">
+      <div class="w-full h-full grid md:grid-cols-3 gap-4">
+        <div class="md:col-span-1 flex flex-col justify-center">
+          <h3 class="title-lg font-heading font-bold mb-2" style="color:var(--ink-90)">Historia breve de NLP</h3>
+          <p class="body-md opacity-90">Marco metodológico histórico de la evolución del Procesamiento del Lenguaje Natural (NLP) </p>
+          <p class="mt-2 text-sm opacity-70"></p>
+        </div>
+        <div class="md:col-span-2">
+          <div class="embed-card w-full h-[min(90vh,calc(100vh-140px))]">
+            <iframe class="embed-frame" src="https://rodrigomolinaavila.github.io/nlp-uah/#tf-idf" loading="lazy" allowfullscreen referrerpolicy="no-referrer" title="Historia NLP — UAH"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 9: NIVEL 2 (BERTopic + SBERT) con UMAP3D ========== -->
+    <section id="slide9" class="slide" style="left: 800vw;">
+      <div class="w-full h-full grid md:grid-cols-3 gap-4 minh-0">
+        <!-- Texto -->
+        <div class="data-card p-4 md:col-span-1 minh-0 scrollable">
+          <div class="chip-title mb-3">
+            <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:#A78BFA;"></span>
+            <h3 class="font-heading font-bold">Nivel 2: NLP (BERTopic + SBERT)</h3>
+          </div>
+          <div class="body-md space-y-4">
+            <div>
+              <h4 class="font-semibold mb-1" style="color:#A78BFA">¿Qué es?</h4>
+              <p>BERTopic agrupa documentos en tópicos usando representaciones semánticas (SBERT). Permite extraer temas coherentes y su evolución temporal con granularidad semántica.</p>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-1" style="color:#10B981">Modelos</h4>
+              <ul class="list-disc pl-5">
+                <li>SBERT (<code>paraphrase-multilingual-mpnet-base-v2</code>)</li>
+                <li>UMAP (reducción y proyección)</li>
+                <li>HDBSCAN (clustering sin K fijo)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-1" style="color:#F59E0B">En los datos</h4>
+              <ul class="list-disc pl-5">
+                <li>Normalización y limpieza contextual</li>
+                <li>Vecinos cercanos / densidad en espacio semántico</li>
+                <li>Validación manual de etiquetas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- UMAP3D -->
+        <div class="data-card p-0 md:col-span-2 minh-0 flex">
+          <iframe class="embed-frame w-full h-full" src="https://rodrigomolinaavila.github.io/umap3d-thinktank-uah/" loading="lazy" allowfullscreen referrerpolicy="no-referrer" title="UMAP 3D Think Tanks — UAH"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 10: DEMO BERTopic (título central) ========== -->
+    <section id="slide10" class="slide" style="left: 900vw;">
+      <div class="w-full h-full grid place-items-center">
+        <h1 class="text-center font-heading font-extrabold" style="
+          font-size: clamp(2.4rem, 6vw, 5.8rem);
+          line-height: 1.08;
+          letter-spacing: -0.01em;
+          background-image: linear-gradient(45deg, var(--uah-orange), var(--uah-orange-2));
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">
+          Demo BERTopic: Tópicos
+        </h1>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 11: IMPLICANCIAS METODOLÓGICAS ========== -->
+    <section id="slide11" class="slide" style="left: 1000vw;">
+      <div class="container mx-auto h-full flex flex-col py-2">
+        <h3 class="title-xl font-heading font-bold text-center mb-4" style="color:var(--ink-90)">Implicancias metodológicas</h3>
+
+        <div class="grid md:grid-cols-2 gap-4 w-[min(1100px,94vw)] mx-auto">
+          <div class="data-card p-4 body-md">
+            <h4 class="font-heading font-semibold mb-2" style="color:#F59E0B">Consideraciones técnicas</h4>
+            <ul class="grid gap-2">
+              <li class="flex gap-3"><i class="fa-solid fa-sliders-h mt-1" style="color:#F59E0B"></i><div><strong>Hiperparámetros</strong>: pruebas iterativas (BERTopic, UMAP, HDBSCAN).</div></li>
+              <li class="flex gap-3"><i class="fa-solid fa-ban mt-1" style="color:#F59E0B"></i><div><strong>Stopwords</strong> personalizadas para contexto chileno.</div></li>
+              <li class="flex gap-3"><i class="fa-solid fa-key mt-1" style="color:#F59E0B"></i><div><strong>Acceso a datos</strong>: sesgos por contenido no público / retirado.</div></li>
+            </ul>
+          </div>
+
+          <div class="data-card p-4 body-md">
+            <h4 class="font-heading font-semibold mb-2" style="color:#A78BFA">Desafíos interpretativos</h4>
+            <ul class="grid gap-2">
+              <li class="flex gap-3"><i class="fa-solid fa-tags mt-1" style="color:#A78BFA"></i><div><strong>Etiquetado</strong> requiere validación experta.</div></li>
+              <li class="flex gap-3"><i class="fa-solid fa-arrow-right-arrow-left mt-1" style="color:#A78BFA"></i><div><strong>Cambio semántico</strong> dependiente de contexto político.</div></li>
+              <li class="flex gap-3"><i class="fa-solid fa-scale-balanced mt-1" style="color:#A78BFA"></i><div><strong>Sesgos</strong> en modelos multilingües.</div></li>
+            </ul>
+          </div>
+
+          <div class="data-card md:col-span-2 p-4">
+            <h4 class="font-heading font-semibold mb-2" style="color:#60A5FA">Recomendaciones</h4>
+            <div class="grid md:grid-cols-3 gap-3 body-md">
+              <div class="data-card p-4 text-center">
+                <div class="text-3xl mb-1" style="color:#60A5FA">1</div>
+                Validación continua con expertos en políticas chilenas.
+              </div>
+              <div class="data-card p-4 text-center">
+                <div class="text-3xl mb-1" style="color:#60A5FA">2</div>
+                Comparar configuraciones de modelos y estabilidad de tópicos.
+              </div>
+              <div class="data-card p-4 text-center">
+                <div class="text-3xl mb-1" style="color:#60A5FA">3</div>
+                Documentación explícita de limitaciones y supuestos.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 12: CONCLUSIONES ========== -->
+    <section id="slide12" class="slide" style="left: 1100vw;">
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 opacity-20" style="background-image:url('https://images.unsplash.com/photo-1627556704302-624286d60a9a?auto=format&fit=crop&w=2100&q=80'); background-size:cover; background-position:center;"></div>
+        <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.55) 100%);"></div>
+      </div>
+
+      <div class="relative z-10 w-full h-full grid place-items-center py-4">
+        <div class="w-[min(1000px,94vw)] data-card p-6 md:p-8 space-y-4 body-md">
+          <h3 class="title-xl font-heading font-bold text-center mb-2" style="color:var(--ink-90)">Conclusiones</h3>
+
+          <div class="grid gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#93C5FD; color:#0B1220; font-weight:800;">1</div>
+              <p>Capacidad de producción se asocia a financiamiento basal, orientación a opinión y sesgos de recursos; visibiliza cambios en la organización del conocimiento experto en turbulencia institucional.</p>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#FDE68A; color:#1F2937; font-weight:800;">2</div>
+              <p>Sensibilidad a momentos críticos (p.ej., COVID-19) y patrones diferenciales de reacción (p.ej., plurinacionalidad).</p>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#6EE7B7; color:#052014; font-weight:800;">3</div>
+              <p>Existe un clúster central (lenguajes próximos) con subclústeres (p.ej., Signos UANDES, Fundación Sol y “centro tecnocrático/económico”: Horizontal, CEP, Espacio Público, LyD).</p>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#FCA5A5; color:#1B0B0B; font-weight:800;">4</div>
+              <p>La <strong style="color:var(--uah-orange)">infraestructura intelectual</strong> muestra concentración de recursos y acceso desigual a plataformas.</p>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#FCA5A5; color:#1B0B0B; font-weight:800;">5</div>
+              <p>Mayor amplitud temática en derecha (más <em>outliers</em> semánticos).</p>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 grid place-items-center rounded-full" style="background:#FCA5A5; color:#1B0B0B; font-weight:800;">6</div>
+              <p>Implicancias sobre quién puede hablar desde este espacio intersticial y con qué legitimidad.</p>
+            </div>
+          </div>
+
+          <div class="text-center pt-2">
+            <a class="inline-block px-7 py-3 rounded-2xl text-white font-heading font-semibold"
+               style="background-image: linear-gradient(90deg, var(--uah-orange), var(--uah-orange-2)); box-shadow: 0 14px 40px rgba(238,93,73,.25);"
+               href="#slide1">¡Gracias!</a>
+            <p class="mt-2 text-sm opacity-70">Presentación: Rodrigo Molina Ávila</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Indicador de slides -->
+  <div class="slide-indicator"></div>
+
+  <!-- Botones navegación -->
+  <div class="navigation-buttons">
+    <button id="prev-btn" class="nav-btn" title="Anterior (↑ / ←)"><i class="fa-solid fa-arrow-up"></i></button>
+    <button id="next-btn" class="nav-btn" title="Siguiente (↓ / → / espacio)"><i class="fa-solid fa-arrow-down"></i></button>
+  </div>
+
+  <!-- Tooltip (reservado por si lo usas luego) -->
+  <div id="tooltip" class="tooltip" style="display:none;"></div>
+
+  <!-- ===== Navegación / motor de slides ===== -->
+  <script>
+    // Slides registrados (TOTAL = 12)
+    const totalSlides = 12;
+    const slides = Array.from({length: totalSlides}, (_, i) => document.getElementById(`slide${i+1}`));
+    let currentSlide = 0;
+
+    // Crear nodos del indicador
+    const indicatorContainer = document.querySelector('.slide-indicator');
+    for(let i=0;i<totalSlides;i++){
+      const node = document.createElement('div');
+      node.className = 'indicator-node';
+      node.dataset.slide = i;
+      node.addEventListener('click', ()=>{ goTo(i); });
+      indicatorContainer.appendChild(node);
+    }
+
+    function refresh(){
+      slides.forEach(s => { s.style.transform = `translateX(${-currentSlide * 100}vw)`; });
+      document.querySelectorAll('.indicator-node').forEach((n,idx)=>{
+        n.classList.toggle('active', idx===currentSlide);
+      });
+    }
+    function goTo(idx){
+      currentSlide = Math.max(0, Math.min(totalSlides-1, idx));
+      refresh();
+    }
+    function next(){ if(currentSlide < totalSlides-1){ currentSlide++; refresh(); } }
+    function prev(){ if(currentSlide > 0){ currentSlide--; refresh(); } }
+
+    // Controles
+    document.getElementById('next-btn').addEventListener('click', next);
+    document.getElementById('prev-btn').addEventListener('click', prev);
+
+    document.addEventListener('keydown', (e)=>{
+      const k = e.key;
+      if(k==='ArrowDown' || k==='ArrowRight' || k===' '){ e.preventDefault(); next(); }
+      else if(k==='ArrowUp' || k==='ArrowLeft'){ e.preventDefault(); prev(); }
+      else if(k>='1' && k<='9'){ const n = parseInt(k,10)-1; if(n < totalSlides) goTo(n); }
+    });
+
+    // Gestos táctiles
+    let tsX=0, tsY=0;
+    document.addEventListener('touchstart', e=>{ tsX = e.changedTouches[0].screenX; tsY = e.changedTouches[0].screenY; }, {passive:true});
+    document.addEventListener('touchend', e=>{
+      const dx = e.changedTouches[0].screenX - tsX;
+      const dy = e.changedTouches[0].screenY - tsY;
+      if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50){
+        // swipe horizontal (por compatibilidad, lo mapeamos a next/prev)
+        if(dx < 0) next(); else prev();
+      }else if(Math.abs(dy) > 50){
+        if(dy < 0) next(); else prev();
+      }
+    }, {passive:true});
+
+    // Init
+    refresh();
+
+    // Ajuste: forzar re-layout al cambiar tamaño (asegura fullscreen limpio)
+    let rt;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(rt);
+      rt = setTimeout(()=> refresh(), 60);
+    });
+  </script>
+</body>
+</html>
